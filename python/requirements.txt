@@ -1,0 +1,10 @@
+numpy
+pandas
+seaborn
+matplotlib
+dataprep
+scikit-learn
+openpyxl
+dataprep
+pip
+autopep8
