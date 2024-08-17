@@ -122,7 +122,7 @@ function App() {
       setSuccess(null); // Clear previous success
 
       const response = await fetch(
-        "http://34.44.42.255/api/regression/predict",
+        "https://api.molana.my.id/awahab/regression/predict",
         {
           method: "POST",
           body: formData,
