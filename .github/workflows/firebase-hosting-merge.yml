@@ -17,6 +17,8 @@ jobs:
           node-version: '18.17.0' # Set this to your project's Node.js version
       - run: npm install --legacy-peer-deps
       - run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:

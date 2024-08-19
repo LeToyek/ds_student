@@ -120,9 +120,8 @@ function App() {
       setIsLoading(true);
       setError(null); // Clear previous error
       setSuccess(null); // Clear previous success
-
       const response = await fetch(
-        "https://api.molana.my.id/awahab/regression/predict",
+        import.meta.env.VITE_API_URL + '/predict',
         {
           method: "POST",
           body: formData,
