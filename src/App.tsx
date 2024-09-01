@@ -11,7 +11,10 @@ import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import "./App.css";
 import { BoxPloter } from "./ui/components/BoxPloter";
+import { BudgetCalculation } from "./ui/components/BudgetCalculation";
 import FileInput from "./ui/components/FileInput";
+import { Registrant } from "./ui/model/registrant";
+import { useBudgetStore } from "./ui/provider/useBudgetStore";
 
 const chartOptions = {
   chart: {
@@ -48,6 +51,7 @@ function App() {
   const [chartData, setChartData] = useState(null); // Store chart data
   const [error, setError] = useState<string | null>(null); // Store error message
   const [success, setSuccess] = useState<string | null>(null); // Store success message
+  const {setAttribute,registrants} = useBudgetStore()
 
   useEffect(() => {
     if (error) {
@@ -62,16 +66,25 @@ function App() {
     }
   }, [success, error]);
 
+  useEffect(() => {
+    if (chartData) {
+      const df = JSON.parse(chartData["TI"].df);
+      const dfRegistrans: Registrant[] = df.map((data: any) => ({
+        sma: data["P_SMA_TI"],
+        ma: data["P_MA_TI"],
+        smk: data["P_SMK_TI"],
+        year: data["year"],
+      }));
+      setAttribute(dfRegistrans);
+      console.log(registrants);
+    }
+  }, [chartData]); 
+
   const detailData = (data: any) => {
     if (!chartData || !chartData[data]) return { series: [], options: {} };
-    
-    console.log('data',chartData[data]);
-    const df = JSON.parse(chartData[data].df);
-    const coef = chartData[data].coef_list;
-    const intercept = chartData[data].intercept;
-    const target = chartData[data].target;
-    console.log('df',df);
-  }
+
+
+  };
 
   const formattedData = (data: any) => {
     if (!chartData || !chartData[data]) return { series: [], options: {} };
@@ -247,8 +260,22 @@ function App() {
           Upload File
         </Button>
       </section>
-      <section id="data-corr">
-        { chartData && <BoxPloter data={chartData} section={'TI'}/> }
+      <section
+        id="data-corr"
+        className="h-[100vh] flex flex-col justify-center "
+      >
+        <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
+          3D Plot of Pendaftar vs Ikut Ujian vs Jml_Mhs_SI
+        </h2>
+        {chartData && <BoxPloter data={chartData} section={"TI"} />}
+      </section>
+      <section className="h-[100vh] flex flex-col justify-start">
+        <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
+          Budget Calculation
+        </h2>
+        <div className="mb-3">
+          <BudgetCalculation/>
+        </div>
       </section>
     </div>
   );
