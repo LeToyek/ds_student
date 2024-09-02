@@ -8,9 +8,6 @@ export type BudgetStore = {
   totalBudget: number;
   registrants: Registrant[];
   registrantBudget: RegistrantBudget[];
-  saranaBudget: number;
-  prasaranaBudget: number;
-  sdmBudget: number;
   setAttribute: (registrants: Registrant[]) => void;
   setNewBaseBudget: (newBaseBudget: number) => void;
   setNewSaranaPercentage: (newSaranaPercentage: number) => void;
