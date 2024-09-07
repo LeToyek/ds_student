@@ -7,7 +7,7 @@ export const BoxPloter = (props: any) => {
   const features = props.data[props.section].features;
 
   const regexPendaftar = /P_/;
-  const regexJumlah = /Jml_/;
+  const regexJumlah = /DU_/;
   const regexIU = /IU_/;
 
 
@@ -55,7 +55,7 @@ export const BoxPloter = (props: any) => {
         title: "3D Plot of Pendaftar vs Ikut Ujian vs Jml_Mhs_TI",
         scene: {
           xaxis: { title: "Pendaftar" },
-          yaxis: { title: "Jumlah" },
+          yaxis: { title: "Daftar Ulang" },
           zaxis: { title: "Ikut Ujian" },
         },
       }}

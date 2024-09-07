@@ -10,11 +10,12 @@ import {
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
+import { Helmet } from "react-helmet-async";
 import "./App.css";
 import { BoxPloter } from "./ui/components/BoxPloter";
 import { BudgetCalculation } from "./ui/components/BudgetCalculation";
 import FileInput from "./ui/components/FileInput";
-import { Registrant } from "./ui/model/registrant";
+import { BaseBudget, Registrants } from "./ui/model/budget";
 import { useAlertStore } from "./ui/provider/useAlertsStore";
 import { useBudgetStore } from "./ui/provider/useBudgetStore";
 
@@ -51,9 +52,10 @@ function App() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chartData, setChartData] = useState(null); // Store chart data
+  const [budgetData, setBudgetData] = useState(null); // Store budget data
   const [error, setError] = useState<string | null>(null); // Store error message
   const [success, setSuccess] = useState<string | null>(null); // Store success message
-  const { setAttribute } = useBudgetStore();
+  const { setAttribute, setRegistrants } = useBudgetStore();
 
   const { alerts, removeAlert } = useAlertStore();
 
@@ -71,25 +73,38 @@ function App() {
   }, [success, error]);
 
   useEffect(() => {
-    if (chartData) {
-      const df = JSON.parse(chartData["TI"].df);
-      const dfRegistrans: Registrant[] = df.map((data: any) => ({
-        sma: data["P_SMA_TI"],
-        ma: data["P_MA_TI"],
-        smk: data["P_SMK_TI"],
-        year: data["year"],
+    if (budgetData) {
+      const df = JSON.parse(budgetData.data);
+      const df_base_budget: BaseBudget[] = df.map((data: any) => ({
+        year: data["Year"],
+        spp: data["SPP"],
+        heregistrasi: data["Heregistrasi"],
+        dpp: data["DPP"],
+        ospek: data["OSPEK"],
+        utsuas: data["UTS&UAS"],
       }));
-      setAttribute(dfRegistrans);
+      setAttribute(df_base_budget);
+    }
+  }, [budgetData]);
+
+  useEffect(() => {
+    if (chartData) {
+      const df_registrants = JSON.parse(chartData["TI"].df);
+      console.log(`df_registrants`, df_registrants);
+      const registrants: Registrants = {};
+      df_registrants.map(
+        (data: any) => (registrants[data["year"]] = data["DU_TI"])
+      );
+      setRegistrants(registrants);
+      // const registrants : Registrant = df_registrants.map((data: any) => ({
+      //   year: data['Year'],
+      //   du: data['DU'],
+      // }));
     }
   }, [chartData]);
 
-  const detailData = (data: any) => {
-    if (!chartData || !chartData[data]) return { series: [], options: {} };
-  };
-
   const formattedData = (data: any) => {
     if (!chartData || !chartData[data]) return { series: [], options: {} };
-    detailData(data);
 
     const actualValues = chartData[data].actual || [];
     const predictions = chartData[data].predictions || [];
@@ -151,13 +166,22 @@ function App() {
         method: "POST",
         body: formData,
       });
+      const responseBudget = await fetch(
+        import.meta.env.VITE_API_URL + "/budgets",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-      if (!response.ok) {
+      if (!response.ok || !responseBudget.ok) {
         throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
+      const dataBudget = await responseBudget.json();
       setSuccess("File uploaded successfully");
+      setBudgetData(dataBudget);
       setChartData(data); // Update chart data
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -168,7 +192,11 @@ function App() {
   };
 
   return (
-    <div className="">
+    <div>
+      <Helmet>
+        <title>Linear Regression Data Mahasiswa</title>
+        <meta name="description" content="Linear Regression Data Mahasiswa" />
+      </Helmet>
       <div className="fixed bottom-4 right-4 space-y-4 z-50">
         {alerts.map((alert) => (
           <Card
@@ -211,70 +239,41 @@ function App() {
           <h1 className="mb-8 text-center font-sans text-3xl md:text-5xl antialiased font-semibold leading-tight tracking-normal text-inherit">
             Linear Regression Data Mahasiswa
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full px-4 md:px-0">
-            <Card className="mb-4 md:mb-3">
-              <CardHeader
-                floated={false}
-                shadow={false}
-                color="transparent"
-                className="flex flex-col gap-4 rounded-none md:flex-row md:items-center"
-              >
-                <div className="w-max rounded-lg bg-gray-900 p-5 text-white">
-                  <Square3Stack3DIcon className="h-6 w-6" />
-                </div>
-                <div>
-                  <Typography variant="h6" color="blue-gray">
-                    Data Mahasiswa SI
-                  </Typography>
-                </div>
-              </CardHeader>
-              <CardBody className="px-2 pb-0">
-                {chartData ? (
-                  <Chart
-                    options={formattedData("SI").options}
-                    series={formattedData("SI").series}
-                    type="line"
-                    height={350}
-                  />
-                ) : (
-                  <Typography variant="small" color="gray">
-                    No data to display. Upload a file to see the charts.
-                  </Typography>
-                )}
-              </CardBody>
-            </Card>
-            <Card className="mb-4 md:mb-3">
-              <CardHeader
-                floated={false}
-                shadow={false}
-                color="transparent"
-                className="flex flex-col gap-4 rounded-none md:flex-row md:items-center"
-              >
-                <div className="w-max rounded-lg bg-gray-900 p-5 text-white">
-                  <Square3Stack3DIcon className="h-6 w-6" />
-                </div>
-                <div>
-                  <Typography variant="h6" color="blue-gray">
-                    Data Mahasiswa TI
-                  </Typography>
-                </div>
-              </CardHeader>
-              <CardBody className="px-2 pb-0">
-                {chartData ? (
-                  <Chart
-                    options={formattedData("TI").options}
-                    series={formattedData("TI").series}
-                    type="line"
-                    height={350}
-                  />
-                ) : (
-                  <Typography variant="small" color="gray">
-                    No data to display. Upload a file to see the charts.
-                  </Typography>
-                )}
-              </CardBody>
-            </Card>
-          </div>
+          {chartData && (
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full px-4 md:px-0">
+              <Card className="mb-4 md:mb-3">
+                <CardHeader
+                  floated={false}
+                  shadow={false}
+                  color="transparent"
+                  className="flex flex-col gap-4 rounded-none md:flex-row md:items-center"
+                >
+                  <div className="w-max rounded-lg bg-gray-900 p-5 text-white">
+                    <Square3Stack3DIcon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <Typography variant="h6" color="blue-gray">
+                      Data Mahasiswa TI
+                    </Typography>
+                  </div>
+                </CardHeader>
+                <CardBody className="px-2 pb-0">
+                  {chartData ? (
+                    <Chart
+                      options={formattedData("TI").options}
+                      series={formattedData("TI").series}
+                      type="line"
+                      height={350}
+                    />
+                  ) : (
+                    <Typography variant="small" color="gray">
+                      No data to display. Upload a file to see the charts.
+                    </Typography>
+                  )}
+                </CardBody>
+              </Card>
+            </div>
+          )}
           <FileInput
             onFileChange={handleFileChange}
             className="w-full max-w-md px-4"
@@ -289,23 +288,27 @@ function App() {
             Upload File
           </Button>
         </section>
-        <section
-          id="data-corr"
-          className="h-[100vh] flex flex-col justify-center "
-        >
-          <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
-            3D Plot of Pendaftar vs Ikut Ujian vs Jml_Mhs_SI
-          </h2>
-          {chartData && <BoxPloter data={chartData} section={"TI"} />}
-        </section>
-        <section className="h-[100vh] flex flex-col justify-start">
-          <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
-            Budget Calculation
-          </h2>
-          <div className="mb-3">
-            <BudgetCalculation />
-          </div>
-        </section>
+        {chartData && (
+          <section
+            id="data-corr"
+            className="h-[100vh] flex flex-col justify-center "
+          >
+            <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
+              Plot 3D
+            </h2>
+            {chartData && <BoxPloter data={chartData} section={"TI"} />}
+          </section>
+        )}
+        {chartData && (
+          <section className="h-[100vh] flex flex-col justify-start">
+            <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
+              Budget Calculation
+            </h2>
+            <div className="mb-3">
+              <BudgetCalculation />
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

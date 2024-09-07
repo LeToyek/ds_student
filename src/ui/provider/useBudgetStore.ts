@@ -1,147 +1,63 @@
 import { create } from "zustand";
-import { BudgetStore } from "../model/budget";
-import { Registrant, RegistrantBudget } from "../model/registrant";
+import { BaseBudget, BaseTotalBudget, BudgetStore, Registrants } from "../model/budget";
 
 export const useBudgetStore = create<BudgetStore>((set) => ({
-  baseBudget: 500000,
-  saranaPercentage: 0.20,
+  baseTotalBudgets: [],
+  totalBudget: 0,
+  saranaPercentage: 0.2,
   prasaranaPercentage: 0.35,
   sdmPercentage: 0.45,
-  totalBudget: 0,
-  registrants: [],
-  registrantBudget: [],
-  setAttribute: (registrants: Registrant[]) => {
-    set((state) => {
-      const tempRegistrantBudget: RegistrantBudget[] = [];
-      let totalBudget = 0;
-      registrants.forEach((registrant) => {
-        const yearBudget =
-          state.baseBudget * (registrant.sma + registrant.ma + registrant.smk);
-        const registrantBudget: RegistrantBudget = {
-          year: registrant.year,
-          sma: registrant.sma * state.baseBudget,
-          ma: registrant.ma * state.baseBudget,
-          smk: registrant.smk * state.baseBudget,
-          yearBudget: yearBudget,
-          saranaBudget: yearBudget * state.saranaPercentage,
-          prasaranaBudget: yearBudget * state.prasaranaPercentage,
-          sdmBudget: yearBudget * state.sdmPercentage,
-        };
-        tempRegistrantBudget.push(registrantBudget);
-        totalBudget += registrantBudget.yearBudget;
-      });
+  registrants:{},
+  setRegistrants: (newRegistrants: Registrants) => {
+    set(() => {
       return {
-        registrants,
-        registrantBudget: tempRegistrantBudget,
-        totalBudget,
+        registrants: newRegistrants,
       };
     });
   },
-  setNewBaseBudget: (newBaseBudget: number) => {
-    set((state) => {
-      const tempRegistrantBudget: RegistrantBudget[] = [];
+  setAttribute: (newBaseBudgets: BaseBudget[]) => {
+    set(() => {
+      const tempBaseBudgets: BaseTotalBudget[] = [];
+
       let totalBudget = 0;
-      state.registrants.forEach((registrant) => {
+      newBaseBudgets.forEach((budget) => {
         const yearBudget =
-          newBaseBudget * (registrant.sma + registrant.ma + registrant.smk);
-        const registrantBudget: RegistrantBudget = {
-          year: registrant.year,
-          sma: registrant.sma * newBaseBudget,
-          ma: registrant.ma * newBaseBudget,
-          smk: registrant.smk * newBaseBudget,
-          yearBudget: yearBudget,
-          saranaBudget: yearBudget * state.saranaPercentage,
-          prasaranaBudget: yearBudget * state.prasaranaPercentage,
-          sdmBudget: yearBudget * state.sdmPercentage,
+          budget.spp +
+          budget.heregistrasi +
+          budget.dpp +
+          budget.ospek +
+          budget.utsuas;
+        const baseTotalBudget: BaseTotalBudget = {
+          baseBudget: budget,
+          totalBudget: yearBudget,
         };
-        tempRegistrantBudget.push(registrantBudget);
-        totalBudget += registrantBudget.yearBudget;
+        tempBaseBudgets.push(baseTotalBudget);
+        totalBudget += yearBudget;
       });
       return {
-        baseBudget: newBaseBudget,
-        registrantBudget: tempRegistrantBudget,
+        baseTotalBudgets: tempBaseBudgets,
         totalBudget,
       };
     });
   },
   setNewSaranaPercentage: (newSaranaPercentage: number) => {
-    set((state) => {
-      const tempRegistrantBudget: RegistrantBudget[] = [];
-      let totalBudget = 0;
-      state.registrants.forEach((registrant) => {
-        const yearBudget =
-          state.baseBudget * (registrant.sma + registrant.ma + registrant.smk);
-        const registrantBudget: RegistrantBudget = {
-          year: registrant.year,
-          sma: registrant.sma * state.baseBudget,
-          ma: registrant.ma * state.baseBudget,
-          smk: registrant.smk * state.baseBudget,
-          yearBudget: yearBudget,
-          saranaBudget: yearBudget * newSaranaPercentage,
-          prasaranaBudget: yearBudget * state.prasaranaPercentage,
-          sdmBudget: yearBudget * state.sdmPercentage,
-        };
-        tempRegistrantBudget.push(registrantBudget);
-        totalBudget += registrantBudget.yearBudget;
-      });
+    set(() => {
       return {
         saranaPercentage: newSaranaPercentage,
-        registrantBudget: tempRegistrantBudget,
-        totalBudget,
       };
     });
   },
   setNewPrasaranaPercentage: (newPrasaranaPercentage: number) => {
-    set((state) => {
-      const tempRegistrantBudget: RegistrantBudget[] = [];
-      let totalBudget = 0;
-      state.registrants.forEach((registrant) => {
-        const yearBudget =
-          state.baseBudget * (registrant.sma + registrant.ma + registrant.smk);
-        const registrantBudget: RegistrantBudget = {
-          year: registrant.year,
-          sma: registrant.sma * state.baseBudget,
-          ma: registrant.ma * state.baseBudget,
-          smk: registrant.smk * state.baseBudget,
-          yearBudget: yearBudget,
-          saranaBudget: yearBudget * state.saranaPercentage,
-          prasaranaBudget: yearBudget * newPrasaranaPercentage,
-          sdmBudget: yearBudget * state.sdmPercentage,
-        };
-        tempRegistrantBudget.push(registrantBudget);
-        totalBudget += registrantBudget.yearBudget;
-      });
+    set(() => {
       return {
         prasaranaPercentage: newPrasaranaPercentage,
-        registrantBudget: tempRegistrantBudget,
-        totalBudget,
       };
     });
   },
   setNewSdmPercentage: (newSdmPercentage: number) => {
-    set((state) => {
-      const tempRegistrantBudget: RegistrantBudget[] = [];
-      let totalBudget = 0;
-      state.registrants.forEach((registrant) => {
-        const yearBudget =
-          state.baseBudget * (registrant.sma + registrant.ma + registrant.smk);
-        const registrantBudget: RegistrantBudget = {
-          year: registrant.year,
-          sma: registrant.sma * state.baseBudget,
-          ma: registrant.ma * state.baseBudget,
-          smk: registrant.smk * state.baseBudget,
-          yearBudget: yearBudget,
-          saranaBudget: yearBudget * state.saranaPercentage,
-          prasaranaBudget: yearBudget * state.prasaranaPercentage,
-          sdmBudget: yearBudget * newSdmPercentage,
-        };
-        tempRegistrantBudget.push(registrantBudget);
-        totalBudget += registrantBudget.yearBudget;
-      });
+    set(() => {
       return {
         sdmPercentage: newSdmPercentage,
-        registrantBudget: tempRegistrantBudget,
-        totalBudget,
       };
     });
   },

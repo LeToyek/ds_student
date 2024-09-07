@@ -2,24 +2,30 @@ import { Card, Input, Typography } from "@material-tailwind/react";
 import { useState } from "react";
 import { FaPercentage } from "react-icons/fa";
 import { moneyParser } from "../../utils/parser";
+import { BaseTotalBudget } from "../model/budget";
 import { useBudgetStore } from "../provider/useBudgetStore";
 
-const TABLE_HEAD = ["YEAR", "SMA", "SMK", "MA", "Total Budget"];
-const TABLE_HEAD_PERCENTAGE = [
+const TABLE_HEAD = [
   "YEAR",
-  "Sarana",
-  "Prasarana",
-  "SDM",
+  "SPP",
+  "Heregistrasi",
+  "DPP",
+  "OSPEK",
+  "UTS&UAS",
   "Total Budget",
+  "Total Pendapatan",
 ];
+
+const TABLE_HEAD_PERCENTAGE = [
+  "YEAR","Sarana", "Prasarana", "SDM"];
 
 export function BudgetCalculation() {
   const {
-    registrantBudget,
     saranaPercentage,
     prasaranaPercentage,
     sdmPercentage,
-    baseBudget,
+    baseTotalBudgets,
+    registrants,
     setNewSaranaPercentage,
     setNewPrasaranaPercentage,
     setNewSdmPercentage,
@@ -55,7 +61,6 @@ export function BudgetCalculation() {
       setIsTyping(false);
     }, 200);
   };
-
   return (
     <div className="w-full flex flex-col">
       {/* Show loading indicator when typing */}
@@ -65,26 +70,127 @@ export function BudgetCalculation() {
         </Typography>
       )}
 
+      <div className="w-full flex flex-col lg:flex-row mb-3">
+        {/* First Card */}
+        <Card className="h-full w-full overflow-auto mx-3 mb-4 lg:mb-0">
+          <table className="w-full min-w-max table-auto text-left">
+            <thead>
+              <tr>
+                {TABLE_HEAD.map((head: string, index: number) => (
+                  <th
+                    key={head}
+                    className={`border-b border-blue-gray-100 p-4 ${
+                      index === TABLE_HEAD.length - 1
+                        ? "bg-yellow-500"
+                        : "bg-light-blue-100"
+                    }`}
+                  >
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal leading-none opacity-70"
+                    >
+                      {head}
+                    </Typography>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {baseTotalBudgets &&
+                baseTotalBudgets.map((e: BaseTotalBudget) => (
+                  <tr
+                    key={e.baseBudget.year}
+                    className="even:bg-blue-gray-50/50"
+                  >
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {e.baseBudget.year}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(e.baseBudget.spp)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(e.baseBudget.heregistrasi)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(e.baseBudget.dpp)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(e.baseBudget.ospek)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(e.baseBudget.utsuas)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(e.totalBudget)}
+                      </Typography>
+                    </td>
+                    <td className="p-4 bg-yellow-200">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(
+                          e.totalBudget * registrants[e.baseBudget.year]
+                        )}
+                      </Typography>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </Card>
+      </div>
       <div className="w-full flex flex-col items-start">
-        <div className="px-3 w-full items-start flex flex-col mb-3">
-        <Typography variant="h4" className="mb-3">
-          Basis Budget
-        </Typography>
-        <Input
-          label="Basis Budget"
-          className="mb-3 font-semibold"
-          value={moneyParser(baseBudget)}
-          crossOrigin={undefined}
-          disabled
-        />
-        </div>
         <Typography variant="h4" className="mx-3 mb-3">
           Persentase
         </Typography>
         <div className="w-full px-3 flex flex-col mb-3 justify-evenly lg:flex-row ">
           <Input
             label="Sarana"
-            className="mb-3 lg:mb-0"
+            className="mb-3"
             icon={<FaPercentage />}
             value={inputValue.sarana}
             crossOrigin={undefined}
@@ -96,7 +202,7 @@ export function BudgetCalculation() {
           />
           <Input
             label="Prasarana"
-            className="mb-3 lg:mb-0"
+            className="mb-3"
             icon={<FaPercentage />}
             value={inputValue.prasarana}
             crossOrigin={undefined}
@@ -108,7 +214,7 @@ export function BudgetCalculation() {
           />
           <Input
             label="SDM"
-            className="mb-3 lg:mb-0"
+            className="mb-3"
             icon={<FaPercentage />}
             value={inputValue.sdm}
             crossOrigin={undefined}
@@ -120,107 +226,16 @@ export function BudgetCalculation() {
           />
         </div>
       </div>
-
-      <div className="w-full flex flex-col lg:flex-row">
+      <div className="w-full flex flex-col lg:flex-row mb-3">
         {/* First Card */}
-        <Card className="h-full w-full lg:w-1/2 overflow-auto mx-3 mb-4 lg:mb-0">
-          <table className="w-full min-w-max table-auto text-left">
-            <thead >
-              <tr>
-                {TABLE_HEAD.map((head: string) => (
-                  <th
-                    key={head}
-                    className="border-b border-blue-gray-100 bg-light-blue-100 p-4"
-                  >
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal leading-none opacity-70"
-                    >
-                      {head}
-                    </Typography>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {registrantBudget &&
-                registrantBudget.map(
-                  ({
-                    year,
-                    sma,
-                    smk,
-                    ma,
-                    yearBudget,
-                  }: {
-                    year: number;
-                    sma: number;
-                    smk: number;
-                    ma: number;
-                    yearBudget: number;
-                  }) => (
-                    <tr key={year} className="even:bg-blue-gray-50/50">
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {year}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(sma)}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(smk)}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(ma)}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(yearBudget)}
-                        </Typography>
-                      </td>
-                    </tr>
-                  )
-                )}
-            </tbody>
-          </table>
-        </Card>
-
-        {/* Second Card */}
-        <Card className="h-full w-full lg:w-1/2 overflow-auto mx-3 mb-4 lg:mb-0">
+        <Card className="h-full w-full overflow-auto mx-3 mb-4 lg:mb-0">
           <table className="w-full min-w-max table-auto text-left">
             <thead>
               <tr>
                 {TABLE_HEAD_PERCENTAGE.map((head: string) => (
                   <th
                     key={head}
-                    className="border-b border-blue-gray-100 bg-green-100 p-4"
+                    className={`border-b border-blue-gray-100 p-4 bg-orange-300 overflow-x-auto`}
                   >
                     <Typography
                       variant="small"
@@ -234,64 +249,52 @@ export function BudgetCalculation() {
               </tr>
             </thead>
             <tbody>
-              {registrantBudget &&
-                registrantBudget.map(
-                  ({
-                    year,
-                    yearBudget,
-                  }: {
-                    year: number;
-                    yearBudget: number;
-                  }) => (
-                    <tr key={year} className="even:bg-blue-gray-50/50">
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {year}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(yearBudget * saranaPercentage)}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(yearBudget * prasaranaPercentage)}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(yearBudget * sdmPercentage)}
-                        </Typography>
-                      </td>
-                      <td className="p-4">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {moneyParser(yearBudget)}
-                        </Typography>
-                      </td>
-                    </tr>
-                  )
-                )}
+              {baseTotalBudgets &&
+                baseTotalBudgets.map((e: BaseTotalBudget) => {
+                  const totalProfit:number =  e.totalBudget * registrants[e.baseBudget.year];
+                  return (
+                  <tr
+                    key={e.baseBudget.year}
+                    className="even:bg-blue-gray-50/50"
+                  >
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {e.baseBudget.year}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(totalProfit * saranaPercentage)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(totalProfit * prasaranaPercentage)}
+                      </Typography>
+                    </td>
+                    <td className="p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {moneyParser(totalProfit * sdmPercentage)}
+                      </Typography>
+                    </td>
+                  </tr>
+                )})}
             </tbody>
           </table>
         </Card>
