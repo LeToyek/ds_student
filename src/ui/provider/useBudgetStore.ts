@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { BaseBudget, BaseTotalBudget, BudgetStore, Registrants } from "../model/budget";
+import { BaseBudget, BaseTotalBudget, BudgetStore, Registrants } from "../model/Budget";
 
 export const useBudgetStore = create<BudgetStore>((set) => ({
   baseTotalBudgets: [],

@@ -2,7 +2,7 @@ import { Card, Input, Typography } from "@material-tailwind/react";
 import { useState } from "react";
 import { FaPercentage } from "react-icons/fa";
 import { moneyParser } from "../../utils/parser";
-import { BaseTotalBudget } from "../model/budget";
+import { BaseTotalBudget } from "../model/Budget";
 import { useBudgetStore } from "../provider/useBudgetStore";
 
 const TABLE_HEAD = [
@@ -62,7 +62,7 @@ export function BudgetCalculation() {
     }, 200);
   };
   return (
-    <div className="w-full flex flex-col">
+    <div className="min-w-[50vw] flex flex-col">
       {/* Show loading indicator when typing */}
       {isTyping && (
         <Typography variant="h4" className="mx-3 mb-3">

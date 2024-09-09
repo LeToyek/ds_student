@@ -12,10 +12,12 @@ import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { Helmet } from "react-helmet-async";
 import "./App.css";
-import { BoxPloter } from "./ui/components/BoxPloter";
 import { BudgetCalculation } from "./ui/components/BudgetCalculation";
 import FileInput from "./ui/components/FileInput";
-import { BaseBudget, Registrants } from "./ui/model/budget";
+import PredictCalculation from "./ui/components/PredictCalculation";
+import { StudentData } from "./ui/components/StudentData";
+import { BaseBudget, Registrants } from "./ui/model/Budget";
+import { LinearAttribute } from "./ui/model/LinearAttribute";
 import { useAlertStore } from "./ui/provider/useAlertsStore";
 import { useBudgetStore } from "./ui/provider/useBudgetStore";
 
@@ -53,6 +55,7 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chartData, setChartData] = useState(null); // Store chart data
   const [budgetData, setBudgetData] = useState(null); // Store budget data
+  const [linearAttribute, setLinearAttribute] = useState<LinearAttribute>()
   const [error, setError] = useState<string | null>(null); // Store error message
   const [success, setSuccess] = useState<string | null>(null); // Store success message
   const { setAttribute, setRegistrants } = useBudgetStore();
@@ -90,12 +93,17 @@ function App() {
   useEffect(() => {
     if (chartData) {
       const df_registrants = JSON.parse(chartData["TI"].df);
-      console.log(`df_registrants`, df_registrants);
       const registrants: Registrants = {};
       df_registrants.map(
         (data: any) => (registrants[data["year"]] = data["DU_TI"])
       );
       setRegistrants(registrants);
+
+      const linearAttribute: LinearAttribute = {
+        slopes: chartData["TI"].coef_list,
+        intercept : chartData["TI"].intercept,
+      }
+      setLinearAttribute(linearAttribute) 
       // const registrants : Registrant = df_registrants.map((data: any) => ({
       //   year: data['Year'],
       //   du: data['DU'],
@@ -180,6 +188,8 @@ function App() {
 
       const data = await response.json();
       const dataBudget = await responseBudget.json();
+
+      console.log(`data`, data);
       setSuccess("File uploaded successfully");
       setBudgetData(dataBudget);
       setChartData(data); // Update chart data
@@ -291,21 +301,35 @@ function App() {
         {chartData && (
           <section
             id="data-corr"
-            className="h-[100vh] flex flex-col justify-center "
+            className="min-h-[100vh] flex flex-col justify-center mb-4 "
           >
             <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
-              Plot 3D
+              Visualisasi Data Mahasiswa
             </h2>
-            {chartData && <BoxPloter data={chartData} section={"TI"} />}
+            <StudentData data={chartData} section={"TI"} />
+            
           </section>
         )}
         {chartData && (
-          <section className="h-[100vh] flex flex-col justify-start">
+          <section className="min-h-[100vh] flex flex-col justify-start">
             <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
               Budget Calculation
             </h2>
             <div className="mb-3">
               <BudgetCalculation />
+            </div>
+          </section>
+        )}
+        {chartData && (
+          <section
+            id="data-corr"
+            className="min-h-[100vh] flex flex-col w-full justify-start"
+          >
+            <h2 className="my-3 block antialiased tracking-normal font-sans text-4xl font-semibold leading-[1.3] text-inherit">
+              Predict New Data Calculation
+            </h2>
+            <div className="mb-3">
+              <PredictCalculation data={linearAttribute}/>
             </div>
           </section>
         )}
