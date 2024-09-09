@@ -129,9 +129,9 @@ const PredictCalculation = ({ data }) => {
   };
 
   return (
-    <div className="w-full">
-      <div className="w-full flex flex-col lg:flex-row">
-        {data && (
+    data && (
+      <div className="w-full">
+        <div className="w-full flex flex-col lg:flex-row">
           <Card className="w-full lg:w-1/3 overflow-auto mx-3 mb-4">
             <table className="w-full min-w-max table-auto text-left">
               <tbody>
@@ -162,128 +162,149 @@ const PredictCalculation = ({ data }) => {
               </tbody>
             </table>
           </Card>
-        )}
 
-        <Card className="w-full lg:w-2/3 mx-3 mb-4">
-          <div className="h-full w-full flex flex-col justify-center p-4 rounded-xl">
-            <div className="flex flex-col lg:flex-row gap-4 mb-3">
-              <Input
-                variant="static"
-                label="Pendaftar"
-                size="md"
-                value={pendaftar}
-                onChange={handleInputChange(setPendaftar)}
-              />
-              <Input
-                variant="static"
-                label="Ikut Ujian"
-                size="md"
-                value={ikutUjian}
-                onChange={handleInputChange(setIkutUjian)}
-              />
-              <IconButton className="p-4" onClick={handleSubmit}>
-                <FaPaperPlane />
-              </IconButton>
+          <Card className="w-full lg:w-2/3 mx-3 mb-4">
+            <div className="h-full w-full flex flex-col justify-center p-4 rounded-xl">
+              <div className="flex flex-col lg:flex-row gap-4 mb-3">
+                <Input
+                  variant="static"
+                  label="Pendaftar"
+                  size="md"
+                  value={pendaftar}
+                  onChange={handleInputChange(setPendaftar)}
+                />
+                <Input
+                  variant="static"
+                  label="Ikut Ujian"
+                  size="md"
+                  value={ikutUjian}
+                  onChange={handleInputChange(setIkutUjian)}
+                />
+                <IconButton className="p-4" onClick={handleSubmit}>
+                  <FaPaperPlane />
+                </IconButton>
+              </div>
+              <div className="w-full text-left mt-2">
+                <Typography color="gray" variant="small">
+                  <p>
+                    <strong>Formula:</strong> Jumlah Mahasiswa TI = &beta;
+                    <sub>0</sub> + &beta;<sub>1</sub> * Pendaftar + &beta;
+                    <sub>2</sub> * Ikut Ujian
+                  </p>
+                </Typography>
+
+                <Typography color="gray" variant="h4">
+                  <p>
+                    <strong>Prediksi Mahasiswa:</strong>{" "}
+                    {pendaftar
+                      ? (
+                          data.intercept +
+                          data.slopes["P_TI"] * pendaftar +
+                          data.slopes["IU_TI"] * ikutUjian
+                        ).toFixed(0)
+                      : "0"}
+                  </p>
+                </Typography>
+              </div>
             </div>
-            <div className="w-full text-left mt-2">
-              <Typography color="gray" variant="small">
-                <p>
-                  <strong>Formula:</strong> Jumlah Mahasiswa TI = &beta;
-                  <sub>0</sub> + &beta;<sub>1</sub> * Pendaftar + &beta;
-                  <sub>2</sub> * Ikut Ujian
-                </p>
-              </Typography>
+          </Card>
+        </div>
 
+        <div className="w-full flex flex-col lg:flex-row">
+          <Card className="w-full lg:w-1/3 mb-3 mx-3 rounded-lg overflow-hidden">
+            <table className="w-full table text-left p-0">
+              <tbody>
+                {budgetAttr.map((data, index) => {
+                  return (
+                    <tr className="even:bg-blue-gray-50/50" key={index}>
+                      <th className="border-b border-blue-gray-100 p-4">
+                        <p>{data.name}</p>
+                      </th>
+                      <td className="border-b border-blue-gray-100 p-4">
+                        <Input
+                          variant="static"
+                          size="md"
+                          value={data.attr}
+                          onChange={handleInputChange(data.function)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+                <tr className="p-4 bg-green-600 text-white">
+                  <th className="border-b border-blue-gray-100 p-4">
+                    <p>Total Budget</p>
+                  </th>
+                  <td className="border-b border-blue-gray-100 p-4">
+                    {moneyParser(totalBudget)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </Card>
+
+          <Card className="w-full lg:w-2/3 mb-3 mx-3">
+            <CardBody>
+              <div className="h-full w-full flex justify-center p-4">
+                <Chart {...chartConfig} />
+                {/* show vertical table of calculation total budget sarana prasarana sdm */}
+                <table className="w-full min-w-max table-auto text-left rounded-xl overflow-hidden">
+                  <tbody>
+                    {portions.map((data, index) => (
+                      <tr key={index}>
+                        <th
+                          className={
+                            `w-1/3  border-b border-gray-100 p-4 text-white ${
+                              index === 0 ? "rounded-tl-lg" : "" // Rounded top-left corner for the first row
+                            } ${
+                              index === portions.length - 1
+                                ? "rounded-bl-lg"
+                                : ""
+                            }` /* Rounded bottom-left corner for the last row */
+                          }
+                          style={{ backgroundColor: data.color }}
+                        >
+                          <p>{data.name}</p>
+                        </th>
+                        <td
+                          className={
+                            `w-2/3 border-b  p-4 ${
+                              index === 0 ? "rounded-tr-lg" : "" // Rounded top-right corner for the first row
+                            } ${
+                              index === portions.length - 1
+                                ? "rounded-br-lg"
+                                : ""
+                            }` /* Rounded bottom-right corner for the last row */
+                          }
+                          style={{ borderColor: data.color }}
+                        >
+                          {moneyParser(totalBudget * data.percentage)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardBody>
+            <CardFooter>
               <Typography color="gray" variant="h4">
                 <p>
-                  <strong>Prediksi Mahasiswa:</strong>{" "}
-                  {pendaftar
-                    ? (
+                  <strong>Total Budget:</strong>{" "}
+                  {moneyParser(
+                    totalBudget *
+                      (
                         data.intercept +
                         data.slopes["P_TI"] * pendaftar +
                         data.slopes["IU_TI"] * ikutUjian
                       ).toFixed(0)
-                    : "0"}
+                  )}
                 </p>
               </Typography>
-            </div>
-          </div>
-        </Card>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
-
-      <div className="w-full flex flex-col lg:flex-row">
-        <Card className="w-full lg:w-1/3 mb-3 mx-3">
-          <table className="w-full table text-left p-0 ">
-            <tbody>
-              {budgetAttr.map((data, index) => {
-                return (
-                  <tr className="even:bg-blue-gray-50/50" key={index}>
-                    <th className="border-b border-blue-gray-100 p-4">
-                      <p>{data.name}</p>
-                    </th>
-                    <td className="border-b border-blue-gray-100 p-4">
-                      <Input
-                        variant="static"
-                        size="md"
-                        value={data.attr}
-                        onChange={handleInputChange(data.function)}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Card>
-        <Card className="w-full lg:w-2/3 mb-3 mx-3">
-          <CardBody>
-            <div className="h-full w-full flex justify-center p-4">
-              <Chart {...chartConfig} />
-              {/* show vertical table of calculation total budget sarana prasarana sdm */}
-              <table className="w-full min-w-max table-auto text-left rounded-xl overflow-hidden">
-                <tbody>
-                  {portions.map((data, index) => (
-                    <tr key={index}>
-                      <th
-                        className={
-                          `w-1/3  border-b border-gray-100 p-4 text-white ${
-                            index === 0 ? "rounded-tl-lg" : "" // Rounded top-left corner for the first row
-                          } ${
-                            index === portions.length - 1 ? "rounded-bl-lg" : ""
-                          }` /* Rounded bottom-left corner for the last row */
-                        }
-                        style={{ backgroundColor: data.color }}
-                      >
-                        <p>{data.name}</p>
-                      </th>
-                      <td
-                        className={
-                          `w-2/3 border-b  p-4 ${
-                            index === 0 ? "rounded-tr-lg" : "" // Rounded top-right corner for the first row
-                          } ${
-                            index === portions.length - 1 ? "rounded-br-lg" : ""
-                          }` /* Rounded bottom-right corner for the last row */
-                        }
-                        style={{ borderColor: data.color }}
-                      >
-                        {moneyParser(totalBudget * data.percentage)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardBody>
-          <CardFooter>
-            <Typography color="gray" variant="h4">
-              <p>
-                <strong>Total Budget:</strong> {moneyParser(totalBudget)}
-              </p>
-            </Typography>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
+    )
   );
 };
 
