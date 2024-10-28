@@ -112,9 +112,8 @@ const PredictCalculation = ({ data }) => {
   }, [saranaPercentage, prasaranaPercentage, sdmPercentage]);
 
   // Function to handle input changes (ensuring numbers only)
-  const handleInputChange = (setter) => (event) => {
+  const handleInputChange = (setter: any, id: string) => (event: any) => {
     const value = event.target.value;
-    // Check if the value is a valid number or an empty string
     if (!isNaN(value) && value !== "") {
       setter(Number(value)); // Convert to number and update state
     } else if (value === "") {
@@ -178,6 +177,7 @@ const PredictCalculation = ({ data }) => {
                   label="Ikut Ujian"
                   size="md"
                   value={ikutUjian}
+                  max={pendaftar}
                   onChange={handleInputChange(setIkutUjian)}
                 />
                 <IconButton className="p-4" onClick={handleSubmit}>
@@ -197,11 +197,13 @@ const PredictCalculation = ({ data }) => {
                   <p>
                     <strong>Prediksi Mahasiswa:</strong>{" "}
                     {pendaftar
-                      ? (
-                          data.intercept +
-                          data.slopes["P_TI"] * pendaftar +
-                          data.slopes["IU_TI"] * ikutUjian
-                        ).toFixed(0)
+                      ? pendaftar < ikutUjian
+                        ? "Pendaftar harus lebih besar dari Ikut Ujian"
+                        : (
+                            data.intercept +
+                            data.slopes["P_TI"] * pendaftar +
+                            data.slopes["IU_TI"] * ikutUjian
+                          ).toFixed(0)
                       : "0"}
                   </p>
                 </Typography>
@@ -236,7 +238,9 @@ const PredictCalculation = ({ data }) => {
                     <p>Total Budget</p>
                   </th>
                   <td className="border-b border-blue-gray-100 p-4">
-                    {moneyParser(totalBudget)}
+                    {pendaftar < ikutUjian
+                      ? "Pendaftar harus lebih besar dari Ikut Ujian"
+                      : moneyParser(totalBudget)}
                   </td>
                 </tr>
               </tbody>
@@ -290,7 +294,7 @@ const PredictCalculation = ({ data }) => {
               <Typography color="gray" variant="h4">
                 <p>
                   <strong>Total Budget:</strong>{" "}
-                  {moneyParser(
+                  {pendaftar < ikutUjian? "Pendaftar harus lebih besar dari Ikut Ujian":moneyParser(
                     totalBudget *
                       (
                         data.intercept +

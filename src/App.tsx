@@ -204,8 +204,8 @@ function App() {
   return (
     <div>
       <Helmet>
-        <title>Linear Regression Data Mahasiswa</title>
-        <meta name="description" content="Linear Regression Data Mahasiswa" />
+        <title>Multiple Linear Regression Data Mahasiswa</title>
+        <meta name="description" content="Multiple Linear Regression Data Mahasiswa" />
       </Helmet>
       <div className="fixed bottom-4 right-4 space-y-4 z-50">
         {alerts.map((alert) => (
@@ -247,7 +247,7 @@ function App() {
         )}
         <section id="landing">
           <h1 className="mb-8 text-center font-sans text-3xl md:text-5xl antialiased font-semibold leading-tight tracking-normal text-inherit">
-            Linear Regression Data Mahasiswa
+            Multiple Linear Regression Data Mahasiswa
           </h1>
           {chartData && (
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full px-4 md:px-0">

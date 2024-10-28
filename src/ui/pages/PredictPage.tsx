@@ -26,7 +26,7 @@ export const PredictPage = () => {
         <title>Research Linear Regression</title>
         <meta
           name="description"
-          content="Linear Regression Data Mahasiswa"
+          content="Multiple Linear Regression Data Mahasiswa"
         />
       </Helmet>
       <IpynbRenderer
